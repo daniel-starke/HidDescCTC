@@ -15,13 +15,18 @@ jobs:
       uses: KyleMayes/install-llvm-action@v1
       with:
         version: "13.0"
+    - name: Install LLD for WASM-LD
+      run: |
+        sudo apt update
+        sudo apt install -y lld-12
+        sudo update-alternatives --install /usr/bin/wasm-ld wasm-ld /usr/bin/wasm-ld-12 100
     - name: Checkout
       uses: actions/checkout@v2
     - name: Build
       run: |
         cd etc
         chmod ugo+x ./build.sh
-        ./build.sh
+        sudo ./build.sh
     - name: Publish
       uses: JamesIves/github-pages-deploy-action@v4
       with:
