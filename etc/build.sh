@@ -10,3 +10,4 @@ sudo tar -xvzf libclang_rt.builtins-wasm32-wasi-16.0.tar.gz -C $(dirname $(dirna
 
 ${CXX} --version
 ${CXX} --sysroot=wasi-sysroot --target=wasm32-wasi -Dconstexpr= -O3 -nostdlib++ -nostartfiles -fno-exceptions -Wl,--no-entry -Wl,--export-dynamic -Wl,--import-memory -fvisibility=hidden -s -o ../docs/assets/HidWebCompiler.wasm HidWebCompiler.cpp || exit 1
+chmod 0777 ../docs/assets/HidWebCompiler.wasm
