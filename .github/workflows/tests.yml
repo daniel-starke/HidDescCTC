@@ -1,0 +1,22 @@
+name: Tests
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - target: "cov"
+          - target: "unit"
+          - target: "fuzzy"
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+    - name: Test
+      run: make -C test ${{ matrix.target }}

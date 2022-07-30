@@ -1,0 +1,18 @@
+{
+	"name": "HidDescCTC",
+	"version": "1.0.0",
+	"description": "USB HID Descriptor Compile Time Compiler for C++14.",
+	"keywords": "arduino,usb,hid",
+	"platforms": "*",
+	"frameworks": "*",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/daniel-starke/HidDescCTC.git"
+	},
+	"authors": {
+		"name": "Daniel Starke",
+		"url": "https://github.com/daniel-starke/",
+		"maintainer": true
+	},
+	"headers": "HidDescriptor.hpp"
+}

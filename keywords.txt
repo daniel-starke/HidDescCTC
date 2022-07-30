@@ -1,0 +1,27 @@
+# @file keywords.txt
+# @author Daniel Starke
+# @copyright Copyright 2022 Daniel Starke
+# @date 2022-05-07
+# @version 2022-06-28
+# @see https://arduino.github.io/arduino-cli/0.21/library-specification/
+#
+# Coloring description:
+# LITERAL1 = literals
+# KEYWORD1 = variables/types
+# KEYWORD2 = functions/methods
+
+# macros
+HID_DESCRIPTOR_NO_ERROR_REPORT	LITERAL1
+DEF_HID_DESCRIPTOR_AS	LITERAL1
+
+# classes
+hid	KEYWORD1
+Descriptor	KEYWORD1
+
+# methods
+fromSource	KEYWORD2
+compiledSize	KEYWORD2
+compileError	KEYWORD2
+reporter	KEYWORD2
+data	KEYWORD2
+size	KEYWORD2
