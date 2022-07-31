@@ -1,0 +1,27 @@
+{
+  "name": "HID Descriptor Compiler",
+  "short_name": "HidDescCTC",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "description": "Compiler for USB HID descriptors.",
+  "related_applications": [{
+    "platform": "github",
+    "url": "https://github.com/daniel-starke/HidDescCTC"
+  }],
+  "icons": [
+    {
+      "src": "./assets/appicon.png",
+      "sizes": "192x192",
+      "type": "image/png",
+	  "purpose": "any"
+    },
+    {
+      "src": "./assets/appicon.png",
+      "sizes": "192x192",
+      "type": "image/png",
+	  "purpose": "maskable"
+    }
+  ],
+  "theme_color": "#333",
+  "background_color": "#FFF"
+}
