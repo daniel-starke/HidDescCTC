@@ -204,7 +204,7 @@ ArgChar = { ItemChar | Digit } ;
 Parameter = "{", { Character - "}" }, "}" ;
 
 UnitName = "Length" | "Mass" | "Time" | "Temp" | "Current" | "Luminous" ;
-BaseUnit = UnitName, "^", ( Exponent | SignedExponent ) ;
+BaseUnit = UnitName, [ "^", ( Exponent | SignedExponent ) ] ;
 Unit = BaseUnit, { BaseUnit } ;
 
 ArgumentName = ItemChar, { ArgChar } ;
