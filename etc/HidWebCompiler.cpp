@@ -3,7 +3,7 @@
  * @author Daniel Starke
  * @copyright Copyright 2022 Daniel Starke
  * @date 2022-05-07
- * @version 2022-05-14
+ * @version 2022-07-31
  */
 #include <stddef.h>
 #include <stdint.h>
@@ -44,7 +44,7 @@ public:
 	/**
 	 * Constructor.
 	 */
-	constexpr inline Writer() noexcept:
+	inline Writer() noexcept:
 		pos(0)
 	{}
 
@@ -53,7 +53,7 @@ public:
 	 * 
 	 * @return write position
 	 */
-	constexpr inline size_t getPosition() const noexcept {
+	inline size_t getPosition() const noexcept {
 		return this->pos;
 	}
 
@@ -63,7 +63,7 @@ public:
 	 * @param[in] val - byte value to write
 	 * @return true on success, else false
 	 */
-	constexpr inline bool write(const uint8_t val) noexcept {
+	inline bool write(const uint8_t val) noexcept {
 		addOutput(val);
 		this->pos++;
 		return true;

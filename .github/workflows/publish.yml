@@ -9,6 +9,7 @@ permissions:
 
 jobs:
   build-and-publish:
+    concurrency: ci-${{ github.ref }}
     runs-on: ubuntu-latest
     steps:
     - name: Install LLD for WASM-LD
@@ -27,3 +28,4 @@ jobs:
       uses: JamesIves/github-pages-deploy-action@v4
       with:
         folder: docs
+        single-commit: true
