@@ -79,7 +79,7 @@ var HidWebCompiler = (function (_self) {
 			} else if (result.data.length != 0) {
 				result.data += " ";
 			}
-			const hexVal = value.toString(16);
+			const hexVal = value.toString(16).toUpperCase();
 			result.data += (hexVal.length < 2) ? "0" + hexVal : hexVal;
 		},
 		/**

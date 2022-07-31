@@ -47,6 +47,16 @@ extern "C" {
 
 
 /**
+ * Used to concatenate pre-processor strings.
+ * 
+ * @internal
+ */
+#define HID_DESC_CAT(x, y) HID_DESC_CAT_HELPER1(x, y)
+#define HID_DESC_CAT_HELPER1(x, y) HID_DESC_CAT_HELPER2(x, y)
+#define HID_DESC_CAT_HELPER2(x, y) x ## y
+
+
+/**
  * @def DEF_HID_DESCRIPTOR_AS
  * Compiles the HID descriptor from the given source code instance.
  * This can be used in global, namespace and function scope. Not in class/struct scope.
@@ -62,8 +72,8 @@ extern "C" {
 	constexpr const auto name = ::hid::Descriptor<::hid::compiledSize(::hid::fromSource desc)>(::hid::fromSource desc)
 #else /* not HID_DESCRIPTOR_NO_ERROR_REPORT */
 #define DEF_HID_DESCRIPTOR_AS(name, desc) \
-	constexpr static const ::hid::Error _hid_error_##__LINE__ = ::hid::compileError(::hid::fromSource desc); \
-	constexpr static const size_t _hid_error_##__LINE__##_num = ::hid::reporter<_hid_error_##__LINE__.line, _hid_error_##__LINE__.column, _hid_error_##__LINE__.message>(); \
+	constexpr static const ::hid::Error HID_DESC_CAT(_hid_error_, __LINE__) = ::hid::compileError(::hid::fromSource desc); \
+	constexpr static const size_t HID_DESC_CAT(HID_DESC_CAT(_hid_error_, __LINE__), _num) = ::hid::reporter<HID_DESC_CAT(_hid_error_, __LINE__).line, HID_DESC_CAT(_hid_error_, __LINE__).column, HID_DESC_CAT(_hid_error_, __LINE__).message>(); \
 	constexpr const auto name = ::hid::Descriptor<::hid::compiledSize(::hid::fromSource desc)>(::hid::fromSource desc)
 #endif /* not HID_DESCRIPTOR_NO_ERROR_REPORT */
 
