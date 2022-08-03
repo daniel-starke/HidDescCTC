@@ -1,6 +1,12 @@
 HidDescCTC
 ==========
 
+<p align="center">
+	<a href="https://github.com/daniel-starke/HidDescCTC/actions/workflows/tests.yml"><img src="https://github.com/daniel-starke/HidDescCTC/actions/workflows/tests.yml/badge.svg"/></a>
+	<a href="https://github.com/daniel-starke/HidDescCTC/deployments/activity_log?environment=github-pages"><img src="https://img.shields.io/github/deployments/daniel-starke/HidDescCTC/github-pages?label=Deployment"/></a>
+	<a href="https://github.com/daniel-starke/HidDescCTC/issues"><img src="https://img.shields.io/github/issues/daniel-starke/HidDescCTC?color=g&label=Issues"/></a>
+</p>
+
 The USB **HID** **Desc**riptor **C**ompile **T**ime **C**ompiler can be
 used to define USB HID descriptors without any runtime overhead using a
 domain specific language and the `constexpr` feature in C++14.  
