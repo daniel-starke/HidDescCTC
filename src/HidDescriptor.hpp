@@ -1,9 +1,9 @@
 /**
  * @file HidDescriptor.hpp
  * @author Daniel Starke
- * @copyright Copyright 2022 Daniel Starke
+ * @copyright Copyright 2022-2023 Daniel Starke
  * @date 2022-04-20
- * @version 2022-07-31
+ * @version 2023-11-05
  * 
  * Helper functions to build a USB HID descriptor. Use `DEF_HID_DESCRIPTOR_AS()`.
  * 
@@ -868,29 +868,29 @@ constexpr inline size_t encodeSigned(Writer & out, const int32_t val) noexcept {
  * 
  * @see HID 1.11 ch. 3.4
  **/
-enum UsageType {
+enum UsageType : uint32_t {
 	UT_NONE = 0,
 	/* Control, ch. 3.4.1 */
-	UT_LC   = 1 << 0,  /**< Linear Control */
-	UT_OOC  = 1 << 1,  /**< On/Off Control */
-	UT_MC   = 1 << 2,  /**< Momentary Control */
-	UT_OSC  = 1 << 3,  /**< One Shot Control */
-	UT_RTC  = 1 << 4,  /**< Re-trigger Control */
+	UT_LC   = 1UL << 0,  /**< Linear Control */
+	UT_OOC  = 1UL << 1,  /**< On/Off Control */
+	UT_MC   = 1UL << 2,  /**< Momentary Control */
+	UT_OSC  = 1UL << 3,  /**< One Shot Control */
+	UT_RTC  = 1UL << 4,  /**< Re-trigger Control */
 	/* Data, ch. 3.4.2 */
-	UT_SEL  = 1 << 5,  /**< Selector */
-	UT_SV   = 1 << 6,  /**< Static Value */
-	UT_SF   = 1 << 7,  /**< Static Flag */
-	UT_DV   = 1 << 8,  /**< Dynamic Value */
-	UT_DF   = 1 << 9,  /**< Dynamic Flag */
+	UT_SEL  = 1UL << 5,  /**< Selector */
+	UT_SV   = 1UL << 6,  /**< Static Value */
+	UT_SF   = 1UL << 7,  /**< Static Flag */
+	UT_DV   = 1UL << 8,  /**< Dynamic Value */
+	UT_DF   = 1UL << 9,  /**< Dynamic Flag */
 	/* Collection, ch. 3.4.3 */
-	UT_NARY = 1 << 10, /**< Named Array */
-	UT_CA   = 1 << 11, /**< Application Collection */
-	UT_CL   = 1 << 12, /**< Logical Collection */
-	UT_CP   = 1 << 13, /**< Physical Collection */
-	UT_US   = 1 << 14, /**< Usage Switch */
-	UT_UM   = 1 << 15, /**< Usage Modifier */
+	UT_NARY = 1UL << 10, /**< Named Array */
+	UT_CA   = 1UL << 11, /**< Application Collection */
+	UT_CL   = 1UL << 12, /**< Logical Collection */
+	UT_CP   = 1UL << 13, /**< Physical Collection */
+	UT_US   = 1UL << 14, /**< Usage Switch */
+	UT_UM   = 1UL << 15, /**< Usage Modifier */
 	/* others */
-	UT_BB   = 1 << 16  /**< Buffered Bytes */
+	UT_BB   = 1UL << 16  /**< Buffered Bytes */
 };
 
 
@@ -4576,7 +4576,7 @@ constexpr bool compile(const Source & source, Writer & out, ::hid::error::Info &
 					/* end of hex literal */
 					flags &= ~HID_WITHIN_HEX_LIT;
 					/* merge multiple arguments via OR */
-					if (encMap->arg == signedNumArg && lit > 0x7FFFFFFF) {
+					if (encMap->arg == signedNumArg && lit > 0x7FFFFFFFUL) {
 						return errorMsg.at(n, E_Number_overflow);
 					}
 					arg |= lit;
@@ -4611,13 +4611,13 @@ constexpr bool compile(const Source & source, Writer & out, ::hid::error::Info &
 					flags &= ~HID_WITHIN_NUM_LIT;
 					/* merge multiple arguments via OR */
 					if ( negLit ) {
-						if (lit > 0x80000000) {
+						if (lit > 0x80000000UL) {
 							return errorMsg.at(n, E_Number_overflow);
 						}
 						arg |= uint32_t(-int32_t(lit));
 						negLit = false;
 					} else {
-						if (encMap->arg == signedNumArg && lit > 0x7FFFFFFF) {
+						if (encMap->arg == signedNumArg && lit > 0x7FFFFFFFUL) {
 							return errorMsg.at(n, E_Number_overflow);
 						}
 						arg |= lit;

@@ -1,6 +1,6 @@
 {
 	"name": "HidDescCTC",
-	"version": "1.0.0",
+	"version": "1.0.1",
 	"description": "USB HID Descriptor Compile Time Compiler for C++14.",
 	"keywords": "arduino,usb,hid",
 	"platforms": "*",

@@ -14,7 +14,7 @@ KFLAGS = --libc=uclibc --posix-runtime --optimize -silent-klee-assume --only-out
 cov: unit.cpp ../src/HidDescriptor.hpp
 	@$(CXX) $(COVCFLAGS) $(CWFLAGS) $(CXXFLAGS) -o cov unit.cpp
 	@./cov >/dev/null 2>&1
-	@$(GCOV) $(GCOVFLAGS) unit.cpp | grep -A 1 "File '../src/HidDescriptor.hpp'"
+	@$(GCOV) $(GCOVFLAGS) cov-* | grep -A 1 "File '../src/HidDescriptor.hpp'"
 	@gawk '/^function .*::(findEncoding|compile<Source).*blocks executed/ {gsub(/\(anonymous namespace\)::/, ""); sub(/^function /, ""); sub(/ called/, "\n -> called"); print $0;}' HidDescriptor.hpp.gcov
 	@rm -f exception.h.gcov initializer_list.gcov new.gcov stdio.h.gcov unit.cpp.gcov unit.gcda unit.gcno 2>/dev/null
 
