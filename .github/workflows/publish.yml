@@ -15,8 +15,8 @@ jobs:
     - name: Install LLD for WASM-LD
       run: |
         sudo apt update
-        sudo apt install -y lld-12
-        sudo update-alternatives --install /usr/bin/wasm-ld wasm-ld /usr/bin/wasm-ld-12 100
+        sudo apt install -y lld-16
+        sudo update-alternatives --install /usr/bin/wasm-ld wasm-ld /usr/bin/wasm-ld-16 100
     - name: Checkout
       uses: actions/checkout@v2
     - name: Build
