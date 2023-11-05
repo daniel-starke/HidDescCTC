@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<!-- PWA requirements: https://developer.mozilla.org/en-US/docs/Web/Progressive_web_apps/Installable_PWAs -->
+<meta name="application-name" content="HID Descriptor Compiler">
+<!-- Include these early and directly so they happen first -->
+<script>
+	/* Install HID Descriptor Compiler as a Progressive Web App for Offline Access
+	 * This needs to be put before ANY HTTP Requests are made, so it can cache them. */
+	if ("serviceWorker" in navigator) {
+		navigator.serviceWorker.register("sw.js").then(function(registration) {
+			registration.update(); /* Always update the registration for the latest assets */
+		}, function() {
+			console.log("Could not register HID Descriptor Compiler for offline use!");
+		});
+	} else {
+		console.log("Browser does not support offline access!");
+	}
+</script>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="shortcut icon" href="assets/favicon.ico" type='image/x-icon' >
+<link rel="apple-touch-icon" href="assets/appicon.png">
+<link rel="stylesheet" href="assets/prism.css"/>
+<title>HID Descriptor Compiler</title>
+<style>
+html {
+    height: calc(100% - 2em);
+}
+
+body {
+	display: block;
+	margin-left: auto;
+	margin-right: auto;
+	width: 95%;
+	height: 100%;
+	font-family: Fira code, Fira Mono, Consolas, Menlo, Courier, monospace;
+	font-size: 14pt;
+	line-height: 1.5;
+}
+
+h1 {
+	text-align: center;
+	font-size: 1.7em;
+	white-space: nowrap;
+}
+
+.app {
+	border: 1px #CCC solid;
+	height: calc(100% - 12em);
+}
+
+.codejar-wrap {
+	height: calc(100% - 1.5em);
+	font-size: inherit;
+}
+
+.codejar-linenumbers {
+	border-right: 1px #CCC solid;
+	height: 100%;
+	text-align: right;
+
+	-webkit-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+}
+
+.editor::-moz-selection,
+.editor::selection {
+	background-color: #ACCEF7!important;
+	text-shadow: none
+}
+
+.editor span::-moz-selection,
+.editor span::selection {
+	background-color: #ACCEF7!important;
+	text-shadow: none
+}
+
+textarea {
+	outline: none;
+}
+
+.statusbar {
+	display: inline-block;
+	border: none;
+	border-top: 1px #CCC solid;
+	width: 100%;
+	height: 1.5em;
+	white-space: nowrap;
+	color: #333;
+}
+
+.statusbar__success, .statusbar__error {
+	padding-left: 0.3em;
+	text-overflow: ellipsis;
+	overflow: hidden;
+}
+
+.statusbar__success {
+	color: #080;
+}
+
+.statusbar__error {
+	color: #C00;
+}
+
+.statusbar__position {
+	border-left: 1px #CCC solid;
+	padding: 0 0.3em 0 0.3em;
+	min-width: 6em!important;
+}
+
+button {
+	margin: 0.6em 0 0.3em 0;
+	min-height: 1.9em;
+	font-family: inherit;
+	font-size: inherit;
+}
+
+.output {
+	width: calc(100% - 1em);
+	border: 1px #CCC solid;
+	background: #EEE;
+	resize: none;
+	margin: 0;
+	padding: 0.3em;
+	overflow-x: hidden;
+	vertical-align: middle;
+}
+
+.copyright {
+	display: block;
+	position: fixed;
+	overflow: hidden;
+	bottom: 0.5em;
+	left: 0;
+	width: calc(100% - 2em);
+	font-size: 0.7em;
+	padding: 0 1em 0 1em;
+}
+
+.copyright a {
+	color: inherit;
+}
+
+@media screen and (max-width: 640px) {
+	body {
+		font-size: 10pt;
+	}
+	h1 {
+		font-size: 1.3em;
+	}
+	.copyright {
+		font-size: 4.5pt;
+	}
+}
+</style>
+</head>
+<body>
+<h1>HID Descriptor Compiler</h1>
+<div class="app">
+	<div class="editor language-hid"></div>
+	<div class="statusbar">
+		<span class="statusbar__success" style="float: left;" id="message"></span>
+		<span style="float: right;">
+		<span class="statusbar__position" id="line">Line: 1</span>
+		<span class="statusbar__position" id="column">Column: 1</span>
+		</span>
+	</div>
+</div>
+<button id="compile-button">Compile</button>
+<button id="copy-source-button">Copy Source</button>
+<button id="copy-url-button">Copy URL</button>
+<button id="copy-output-button">Copy Output</button>
+</br>
+<textarea class="output" readonly="true" spellcheck="false" autocapitalize="none" autocomplete="off" autocorrect="off" rows="2"></textarea>
+<div class="copyright">
+<span style="float: left;">&copy;2022 Daniel Starke, credits to <a href="https://github.com/antonmedv/codejar">CodeJar</a> and <a href="https://github.com/PrismJS">PrismJS</a></span>
+<span style="float: right;">found on <a href="https://github.com/daniel-starke/HidDescCTC">Github.com</a></span>
+</div>
+
+<script src="assets/prism.js"></script>
+<script src="assets/codejar.js"></script>
+<script src="assets/linenumbers.js"></script>
+<script src="assets/HidWebCompiler.js"></script>
+<script>
+/** Custom PrismJS syntax highlighting for HID Descriptor. */
+Prism.languages.hid = {
+	'comment': {
+		pattern: /[#;].*|$/,
+		greedy: true,
+		lookbehind: true
+	},
+	'number': /0x[0-9a-fA-F]+/,
+	'variable': {
+		pattern: /\{[^}]*}/,
+		greedy: true
+	},
+	'operator': /,/,
+	'argument': {
+		pattern: /\([,_^0-9a-z{} \t\n\r-]*\)/i,
+		greedy: true,
+		inside: {
+			'string': {
+				pattern: /[_a-z][_a-z0-9]*/i,
+				greedy: true
+			},
+			'number': {
+				pattern: /0x[0-9a-fA-F]+|-?\d+/,
+				greedy: true
+			},
+			'variable': {
+				pattern: /\{[^}]*}/,
+				greedy: true
+			},
+			'operator': /[(),^]/
+		}
+	},
+	'keyword': {
+		pattern: /[_a-z][_0-9a-z]*/i,
+		greedy: true
+	}
+};
+
+/** Instantiate source code editor. */
+const highlightElementFn = withLineNumbers(Prism.highlightElement, {width: "3.8em"});
+var jar = CodeJar(
+	document.querySelector(".editor"),
+	highlightElementFn,
+	{
+		indentOn: /(^|[^_a-z0-9])collection[ \t]*\([^)]*\)[ \t]*$|[({]$/i,
+		moveToNewLine: /^[)}]/
+	}
+);
+jar.updateCode(
+	'# Example based on HID 1.11 appendix D.1\n' +
+	'UsagePage(GenericDesktop)\n' +
+	'Usage(Joystick)\n' +
+	'Collection(Application)\n' +
+	'	UsagePage(GenericDesktop)\n' +
+	'	Usage(Pointer)\n' +
+	'	Collection(Physical)\n' +
+	'		LogicalMinimum(-127)\n' +
+	'		LogicalMaximum(127)\n' +
+	'		ReportSize(8)\n' +
+	'		ReportCount(2)\n' +
+	'		Push\n' +
+	'		Usage(X)\n' +
+	'		Usage(Y)\n' +
+	'		Input(Data, Var, Abs)\n' +
+	'		Usage(HatSwitch)\n' +
+	'		LogicalMinimum(0)\n' +
+	'		LogicalMaximum(3)\n' +
+	'		PhysicalMinimum(0)\n' +
+	'		PhysicalMaximum(270)\n' +
+	'		Unit(EngRot(Length)) # Degrees\n' +
+	'		ReportCount(1)\n' +
+	'		ReportSize(4)\n' +
+	'		Input(Data, Var, Abs, Null)\n' +
+	'		LogicalMinimum(0)\n' +
+	'		LogicalMaximum(1)\n' +
+	'		ReportCount(2)\n' +
+	'		ReportSize(1)\n' +
+	'		UsagePage(Button)\n' +
+	'		UsageMinimum(Button1)\n' +
+	'		UsageMaximum(Button2)\n' +
+	'		Unit(None)\n' +
+	'		Input(Data, Var, Abs)\n' +
+	'	EndCollection\n' +
+	'	UsageMinimum(Button3)\n' +
+	'	UsageMinimum(Button4)\n' +
+	'	Input(Data, Var, Abs)\n' +
+	'	# use LogicalMinimum/LogicalMaximum from before Push\n' +
+	'	Pop\n' +
+	'	UsagePage(SimulationControls)\n' +
+	'	Usage(Throttle)\n' +
+	'	ReportCount({arg1})\n' +
+	'	ReportSize(1)\n' +
+	'	Input(Data, Var, Abs)\n' +
+	'EndCollection'
+);
+
+/** Update statusbar position information at cursor change. */
+(function () {
+	/**
+	 * getSelectedRange() helper to handle child nodes correctly.
+	 *
+	 * @param[in] parent - parent node
+	 * @param[in] endNode - final node element
+	 * @param[in] offset - final node offset
+	 * @param[in] ctx - accumulated position context
+	 * @return accumulated position
+	 */
+	function countUntilEndContainer(parent, endNode, offset, ctx = {count: 0}) {
+		for (var node of parent.childNodes) {
+			if ( ctx.done ) break;
+			if (node === endNode) {
+				ctx.done = true;
+				ctx.offsetInNode = offset;
+				return ctx;
+			}
+			if (node.nodeType === Node.TEXT_NODE) {
+				ctx.offsetInNode = offset;
+				ctx.count += node.length;
+			} else if (node.nodeType === Node.ELEMENT_NODE) {
+				countUntilEndContainer(node, endNode, offset, ctx);
+			} else {
+				ctx.error = true;
+			}
+		}
+		return ctx;
+	}
+	
+	/**
+	 * Returns the selected range within the given editablecontent element.
+	 *
+	 * @param[in] element - editablecontent div element
+	 * @return selected range
+	 */
+	function getSelectedRange(editor) {
+		const sel = window.getSelection();
+		if (sel.rangeCount === 0) {
+			return null;
+		}
+		const range = sel.getRangeAt(0);    
+		const start = countUntilEndContainer(editor, range.startContainer, range.startOffset);
+		const end = countUntilEndContainer(editor, range.endContainer, range.endOffset);
+		return { start: start.count + start.offsetInNode, end: end.count + end.offsetInNode };
+	}
+
+	var cPos = 0;
+	document.addEventListener("selectionchange", function () {
+		const editorElement = document.querySelector(".editor");
+		var newCPos = getSelectedRange(editorElement);
+		newCPos = "end" in newCPos ? newCPos.end : 0;
+		if (newCPos != cPos) {
+			const code = editorElement.textContent;
+			var line = 1;
+			var column = 1;
+			for (var i = 0; i < newCPos && i < code.length; i++) {
+				const c = code[i];
+				if (c == '\n') {
+					line++;
+					column = 1;
+				} else if (c != '\r') {
+					column++;
+				}
+			}
+			document.querySelector("#line").innerText = "Line: " + line;
+			document.querySelector("#column").innerText = "Column: " + column;
+			cPos = newCPos;
+		}
+	})
+}());
+
+/** Load WASM module and handle compile button pushes accordingly. */
+(function () {
+	HidWebCompiler.load("assets/HidWebCompiler.wasm");
+	
+	var errorPos = undefined;
+	
+	/**
+	 * Finds the Prism Token and parent Token at the given position.
+	 * This function works recursively.
+	 *
+	 * @param[in] parent - current parent Token
+	 * @param[in] current - current Token
+	 * @param[in] ctx - search context with current position and status
+	 * @return updated ctx
+	 */
+	function handleToken(parent, current, ctx) {
+		if ((ctx.pos + current.length) <= errorPos) {
+			/* skip over */
+			ctx.pos += current.length;
+		} else if (current.hasOwnProperty("content") && Array.isArray(current.content)) {
+			/* found in token list */
+			for (const token of current.content) {
+				if ( ctx.done ) break;
+				ctx = handleToken(current.content, token, ctx);
+			}
+		} else {
+			/* found in elementary token */
+			ctx.parent = parent;
+			ctx.current = current;
+			ctx.posWithin = errorPos - ctx.pos;
+			ctx.done = true;
+		}
+		return ctx;
+	}
+	
+	Prism.hooks.add("after-tokenize", function (env) {
+		if ( ! errorPos ) return;
+		/* find token at error position */
+		ctx = {pos: 0, done: false};
+		for (const token of env.tokens) {
+			ctx = handleToken(env.tokens, token, ctx);
+			if ( ctx.done ) break;
+		}
+		if ( ctx.done ) {
+			/* found within token */
+			const idx = ctx.parent.indexOf(ctx.current);
+			var before, after;
+			if (ctx.current instanceof Prism.Token) {
+				/* split token at error position */
+				before = new Prism.Token(
+					ctx.current.type,
+					ctx.current.content.slice(0, ctx.posWithin + 1),
+					"error-pos",
+					ctx.current.content.slice(0, ctx.posWithin + 1)
+				);
+				after = new Prism.Token(
+					ctx.current.type,
+					ctx.current.content.slice(ctx.posWithin + 1),
+					ctx.current.alias,
+					ctx.current.content.slice(ctx.posWithin + 1)
+				);
+			} else {
+				/* split string at error position */
+				before = ctx.current.slice(0, ctx.posWithin + 1);
+				after = ctx.current.slice(ctx.posWithin + 1);
+				before = new Prism.Token("error-pos", before, "", before);
+			}
+			/* replace existing item with the created non-empty split tokens */
+			var replacement = [];
+			if (before.length > 0) {
+				replacement.push(before);
+			}
+			if (after.length > 0) {
+				replacement.push(after);
+			}
+			Array.prototype.splice.apply(ctx.parent, [idx, 1].concat(replacement));
+		} else {
+			/* found outside token */
+			if (env.tokens.length > 0) {
+				env.tokens.slice(-1).alias = "error-pos";
+			} else {
+				env.tokens.push(new Prism.Token("error-pos", "", ""));
+			}
+		}
+	});
+	
+	document.querySelector("#compile-button").addEventListener("click", function () {
+		const editor = document.querySelector(".editor");
+		const sourceCode = editor.textContent;
+		const result = HidWebCompiler.compile(sourceCode);
+		document.querySelector(".output").innerText = (result.data != null) ? result.data : ""
+		const statusElement = document.querySelector("#message");
+		if ( result.error ) {
+			statusElement.innerText = result.error.line + ":" + result.error.column + ": Error: " + result.error.message;
+			statusElement.className = "statusbar__error";
+			errorPos = result.error.pos;
+			highlightElementFn(editor);
+			errorPos = undefined;
+		} else {
+			statusElement.innerText = "Success";
+			statusElement.className = "statusbar__success";
+		}
+	});
+}());
+
+/** Handling for copy buttons. */
+(function () {
+	/**
+	 * Copy the passed text to the browser clipboard.
+	 *
+	 * @param[in] text - text to copy
+	 */
+	function copyToClipboard(text) {
+		var textarea = document.createElement("textarea");
+		textarea.textContent = text;
+		textarea.style.position = "fixed";
+		document.body.appendChild(textarea);
+		textarea.select();
+		try {
+			document.execCommand("copy");
+		} catch (ex) {
+			return prompt("Copy to clipboard: Ctrl+C, Enter", text);
+		} finally {
+			document.body.removeChild(textarea);
+		}
+	}
+	
+	/* Copy Source */
+	document.querySelector("#copy-source-button").addEventListener("click", function () {
+		copyToClipboard(document.querySelector(".editor").textContent);
+	});
+	
+	/* Copy URL */
+	document.querySelector("#copy-url-button").addEventListener("click", function () {
+		const sourceBase64 = btoa(document.querySelector(".editor").textContent);
+		const searchParams = new URLSearchParams('src=' + encodeURIComponent(sourceBase64));
+		copyToClipboard(window.location.href.split('?')[0] + '?' + searchParams.toString());
+	});
+	
+	/* Copy Output */
+	document.querySelector("#copy-output-button").addEventListener("click", function () {
+		copyToClipboard(document.querySelector(".output").textContent);
+	});
+	
+	/* Get code from URL */
+	const searchParams = new URLSearchParams(window.location.search);
+	const sourceFromParams = searchParams.has('src') ? atob(searchParams.get('src')) : '';
+	if (sourceFromParams && sourceFromParams.length > 0) {
+		jar.updateCode(sourceFromParams);
+	}
+}());
+</script>
+</body>
+</html>
