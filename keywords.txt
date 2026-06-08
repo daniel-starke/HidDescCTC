@@ -1,8 +1,8 @@
 # @file keywords.txt
 # @author Daniel Starke
-# @copyright Copyright 2022 Daniel Starke
+# @copyright Copyright 2022-2026 Daniel Starke
 # @date 2022-05-07
-# @version 2022-06-28
+# @version 2026-06-08
 # @see https://arduino.github.io/arduino-cli/0.21/library-specification/
 #
 # Coloring description:
